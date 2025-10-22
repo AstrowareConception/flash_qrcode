@@ -1,6 +1,7 @@
 # Démo Scanner QR Code
 
 Ce projet est une démonstration pédagogique d'un scanner de QR code pour appareils mobiles. Il a été conçu pour aider les étudiants à comprendre comment intégrer un système de scan de QR code dans leurs propres projets.
+Pour tester sur votre téléphone : [https://astrowareconception.github.io/flash_qrcode/index.htm](https://astrowareconception.github.io/flash_qrcode/index.html) 
 
 ## Fonctionnalités
 
@@ -72,5 +73,6 @@ Pour intégrer cette fonctionnalité dans vos propres projets:
 - [Générateur de QR Code](https://www.qr-code-generator.com/) pour créer vos propres QR codes à tester
 
 ## Licence
+
 
 Ce projet est disponible sous licence MIT. Vous êtes libre de l'utiliser, le modifier et le distribuer dans vos propres projets.
