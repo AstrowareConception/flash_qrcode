@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Démo Scanner QR Code</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        #qr-reader {
+            width: 100%;
+            max-width: 500px;
+            display: none;
+        }
+        #scan-button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            display: none;
+        }
+        .explanation {
+            background-color: #f0f8ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 30px;
+            border-left: 5px solid #4CAF50;
+        }
+        code {
+            background-color: #f1f1f1;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Démo Scanner QR Code</h1>
+
+    <div class="container">
+        <!-- Bouton pour activer le scanner -->
+        <button id="scan-button">Flasher QRCode</button>
+
+        <!-- Div où le scanner QR code sera affiché -->
+        <div id="qr-reader"></div>
+
+        <!-- Div pour afficher le résultat du scan -->
+        <div id="result">
+            <h3>Contenu du QR Code:</h3>
+            <p id="qr-result"></p>
+        </div>
+
+        <!-- Lien vers le générateur de QR code -->
+        <div style="margin-top: 20px;">
+            <a href="qr-generator.html" style="color: #4CAF50; text-decoration: none;">Générer un QR Code de test</a>
+        </div>
+    </div>
+
+    <div class="explanation">
+        <h2>Comment ça marche?</h2>
+        <p>Cette démo utilise la bibliothèque <code>html5-qrcode</code> pour scanner des QR codes avec la caméra de votre appareil mobile.</p>
+        <p>Voici les étapes principales:</p>
+        <ol>
+            <li>Importation de la bibliothèque <code>html5-qrcode</code></li>
+            <li>Création d'un bouton qui, lorsqu'il est cliqué, initialise le scanner</li>
+            <li>Configuration du scanner pour utiliser la caméra arrière par défaut</li>
+            <li>Définition d'une fonction de rappel qui s'exécute lorsqu'un QR code est détecté</li>
+            <li>Affichage du contenu du QR code scanné</li>
+        </ol>
+    </div>
+
+    <!-- Importation de la bibliothèque html5-qrcode -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <script>
+        // Attendre que le DOM soit complètement chargé
+        document.addEventListener('DOMContentLoaded', function() {
+            // Récupérer les éléments du DOM
+            const scanButton = document.getElementById('scan-button');
+            const qrReader = document.getElementById('qr-reader');
+            const resultDiv = document.getElementById('result');
+            const qrResult = document.getElementById('qr-result');
+
+            // Variable pour stocker l'instance du scanner
+            let html5QrCode;
+
+            // Fonction pour démarrer le scanner
+            function startScanner() {
+                // Afficher le div du scanner
+                qrReader.style.display = 'block';
+
+                // Créer une nouvelle instance de Html5Qrcode
+                html5QrCode = new Html5Qrcode("qr-reader");
+
+                // Options de configuration pour le scanner
+                const config = {
+                    fps: 10,               // Nombre d'images traitées par seconde
+                    qrbox: 250,            // Taille de la boîte de scan en pixels
+                    aspectRatio: 1.0,      // Ratio d'aspect de la vidéo
+                    formatsToSupport: [    // Formats de codes à supporter
+                        Html5QrcodeSupportedFormats.QR_CODE
+                    ]
+                };
+
+                // Démarrer le scanner avec la caméra arrière (si disponible)
+                html5QrCode.start(
+                    { facingMode: "environment" }, // Utiliser la caméra arrière
+                    config,
+                    onScanSuccess,         // Fonction appelée en cas de succès
+                    onScanFailure          // Fonction appelée en cas d'échec
+                ).catch(err => {
+                    console.error(`Impossible de démarrer le scanner: ${err}`);
+                    alert("Impossible d'accéder à la caméra. Vérifiez que vous avez donné les permissions nécessaires.");
+                });
+            }
+
+            // Fonction appelée lorsqu'un QR code est détecté avec succès
+            function onScanSuccess(decodedText, decodedResult) {
+                // Arrêter le scanner
+                stopScanner();
+
+                // Afficher le résultat
+                qrResult.textContent = decodedText;
+                resultDiv.style.display = 'block';
+
+                console.log(`QR Code détecté: ${decodedText}`, decodedResult);
+            }
+
+            // Fonction appelée en cas d'échec de détection
+            function onScanFailure(error) {
+                // Cette fonction est appelée pour chaque frame où aucun QR code n'est détecté
+                // Nous ne faisons rien ici pour éviter de spammer la console
+            }
+
+            // Fonction pour arrêter le scanner
+            function stopScanner() {
+                if (html5QrCode) {
+                    html5QrCode.stop().then(() => {
+                        console.log('Scanner arrêté');
+                        qrReader.style.display = 'none';
+                    }).catch(err => {
+                        console.error(`Erreur lors de l'arrêt du scanner: ${err}`);
+                    });
+                }
+            }
+
+            // Ajouter un écouteur d'événement au bouton de scan
+            scanButton.addEventListener('click', startScanner);
+        });
+    </script>
+</body>
+</html>
